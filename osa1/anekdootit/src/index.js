@@ -8,7 +8,16 @@ const App = (props) => {
   const [selected, setSelected] = useState(all[randomNum(all.length-1)])
 
 
+const mostVotes = () => {
 
+    const allVotes = all.map(obj => obj.votes)
+    const maxIndex = allVotes.indexOf(Math.max.apply(Math, allVotes))
+    const chosenObj = all[maxIndex]
+    console.log(chosenObj)
+    return(chosenObj)
+}
+
+const [popularAnecdote, setPop] = useState(all[0])
 
   //Anekdootin vaihdosta huolehtiva tapahtumankäsittelijä
 
@@ -31,19 +40,22 @@ const voteHandler = () => {
   copyAll[index] = copyObj
   setSelected(copyObj)
   setAll(copyAll)
+  setPop(mostVotes())
   console.log(selected.votes)
    
 }
 
   return (
     <div>
-      
+        <h2>Anecdote of the day</h2>
         <p>{selected.text}</p>
         <p>has {selected.votes} votes</p>
-      
 
+        <Button text = {'Vote'} handler = {voteHandler} /> <Button text = {'Next anecdote'} handler = {switchHandler} />
 
-      <Button text = {'Vote'} handler = {voteHandler} /> <Button text = {'Next anecdote'} handler = {switchHandler} />
+        <h2>Anecdote with most votes</h2>
+        <p>{popularAnecdote.text}</p>
+        <p>has {popularAnecdote.votes} votes</p>
     </div>
 
     
