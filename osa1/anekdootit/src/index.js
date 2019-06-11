@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom'
 
 const App = (props) => {
 
-  const [index, setIndex] = useState(0)
   const [all, setAll] = useState(anecdotes)
-  const [selected, setSelected] = useState(all[randomNum(all.length-1)])
+  const [index, setIndex] = useState(0)
+  const [selected, setSelected] = useState(all[0])
 
 
 const mostVotes = () => {
@@ -13,7 +13,7 @@ const mostVotes = () => {
     const allVotes = all.map(obj => obj.votes)
     const maxIndex = allVotes.indexOf(Math.max.apply(Math, allVotes))
     const chosenObj = all[maxIndex]
-    console.log(chosenObj)
+    console.log(allVotes)
     return(chosenObj)
 }
 
@@ -22,11 +22,22 @@ const [popularAnecdote, setPop] = useState(all[0])
   //Anekdootin vaihdosta huolehtiva tapahtumankäsittelijä
 
 const switchHandler = () => {
+  
+  let newIndex = randomNum(all.length)
+  const previousIndex = index
 
-  console.log("Kutsu tapahtuu")
-  console.log(all.map( thing => thing.votes))
-  setIndex(randomNum(all.length-1))
-  setSelected(all[index])
+  //Estetään saman anekdootin ilmaantuminen 2 kertaa peräkkäin
+
+  while(newIndex === previousIndex){
+      newIndex = randomNum(all.length)
+  }
+
+  setIndex(newIndex)
+  setSelected(all[newIndex])
+  setAll(all)
+  console.log("NewIndex: " , newIndex)
+  console.log("Index" , index)
+  console.log("Switch to ", index )
 
 }
 
@@ -41,7 +52,7 @@ const voteHandler = () => {
   setSelected(copyObj)
   setAll(copyAll)
   setPop(mostVotes())
-  console.log(selected.votes)
+
    
 }
 
@@ -51,7 +62,8 @@ const voteHandler = () => {
         <p>{selected.text}</p>
         <p>has {selected.votes} votes</p>
 
-        <Button text = {'Vote'} handler = {voteHandler} /> <Button text = {'Next anecdote'} handler = {switchHandler} />
+        <Button text = {'Vote'} handler = {voteHandler} /> 
+        <Button text = {'Next anecdote'} handler = {switchHandler} />
 
         <h2>Anecdote with most votes</h2>
         <p>{popularAnecdote.text}</p>
