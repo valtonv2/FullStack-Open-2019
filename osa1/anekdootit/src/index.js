@@ -3,41 +3,37 @@ import ReactDOM from 'react-dom'
 
 const App = (props) => {
 
-  const [all, setAll] = useState(anecdotes)
-  const [index, setIndex] = useState(0)
-  const [selected, setSelected] = useState(all[0])
+  const [selected, setSelected] = useState(anecdotes[0])
+  const [popularAnecdote, setPop] = useState(anecdotes[0])
 
 
 const mostVotes = () => {
 
-    const allVotes = all.map(obj => obj.votes)
+    const allVotes = anecdotes.map(obj => obj.votes)
     const maxIndex = allVotes.indexOf(Math.max.apply(Math, allVotes))
-    const chosenObj = all[maxIndex]
+    const chosenObj = anecdotes[maxIndex]
     console.log(allVotes)
     return(chosenObj)
 }
-
-const [popularAnecdote, setPop] = useState(all[0])
 
   //Anekdootin vaihdosta huolehtiva tapahtumankäsittelijä
 
 const switchHandler = () => {
   
-  let newIndex = randomNum(all.length)
-  const previousIndex = index
+  let newIndex = randomNum(anecdotes.length)
+  const previousIndex = anecdotes.indexOf(selected)
 
   //Estetään saman anekdootin ilmaantuminen 2 kertaa peräkkäin
 
   while(newIndex === previousIndex){
-      newIndex = randomNum(all.length)
+      newIndex = randomNum(anecdotes.length)
   }
 
-  setIndex(newIndex)
-  setSelected(all[newIndex])
-  setAll(all)
+  setSelected(anecdotes[newIndex])
+  setPop(mostVotes())
   console.log("NewIndex: " , newIndex)
-  console.log("Index" , index)
-  console.log("Switch to ", index )
+  console.log("PreviousIndex" , previousIndex)
+
 
 }
 
@@ -45,13 +41,14 @@ const switchHandler = () => {
 
 const voteHandler = () => {
   console.log("Voted")
+  const currentIndex = anecdotes.indexOf(selected)
   const copyObj = {...selected}
-  const copyAll = [...all]
   copyObj.votes += 1
-  copyAll[index] = copyObj
+  anecdotes[currentIndex] = copyObj
   setSelected(copyObj)
-  setAll(copyAll)
   setPop(mostVotes())
+
+  console.log("Current Index: ", currentIndex)
 
    
 }
