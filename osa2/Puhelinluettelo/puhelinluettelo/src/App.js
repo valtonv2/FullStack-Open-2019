@@ -1,4 +1,8 @@
 import React, { useState } from 'react'
+import Personform from './Components/Personform'
+import Filterform from './Components/Filterform'
+import Listofpeople from './Components/Listofpeople'
+
 
 const App = () => {
   const [ persons, setPersons] = useState([
@@ -60,19 +64,21 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
 
+      <Filterform 
+      filterLetters = {filterLetters} 
+      changeHandler = {handleFilter}
+      />
 
-      <form>
-        <div>Filter shown with <input value = {filterLetters} onChange = {handleFilter}/></div>
 
-      </form>
+      <Personform 
+      addFunction = {addNewPerson} 
+      currentName = {newName} 
+      nameChangeHandler = {handleNameWrite} 
+      currentNum = {newNum} 
+      numChangeHandler = {handleNumberWrite} 
+      />
 
-      <form onSubmit={addNewPerson}>
-        <div> name: <input value={newName} onChange = {handleNameWrite}/></div>
-        <div> number: <input value = {newNum} onChange = {handleNumberWrite}/> </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+  
       <h2>Numbers</h2>
       <Listofpeople list = {persons.filter(person => person.name.slice(0, filterLetters.length) === filterLetters)} />
        
@@ -82,28 +88,7 @@ const App = () => {
 
 }
 
-const Person = ({name, number}) => {
-
-return( 
-<div>
-<p>{name}  {number}</p>
-</div>
-)
-
-}
 
 
-//Komponentti joka renderöi ihmislistan. 
-//Huolehtii filtteröinnistä.
-const Listofpeople = ({list}) => {
-
-return(
-
-  <div>{list.map(dataItem => <Person key = {dataItem.name} name = {dataItem.name} number = {dataItem.number}/>)}</div>
-
-)
-
-
-}
 
 export default App
