@@ -1,23 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Personform from './Components/Personform'
 import Filterform from './Components/Filterform'
 import Listofpeople from './Components/Listofpeople'
-
+import serverComm from './services/Persons'
+import Notification from './Components/Notification'
 
 const App = () => {
-  const [ persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [ persons, setPersons] = useState([]) 
 
+  useEffect(() => {
+
+    serverComm.getAllData().then(data => setPersons(data))
+    
+
+  }, [])
 
   const [ newName, setNewName ] = useState('')
 
   const [newNum, setNewNum] = useState('')
 
   const [filterLetters, setFilterLetters] = useState('')
+
+  const [announcement, setAnnouncement] = useState(null)
+
+  const [isError, setError] = useState(false)
+
 
 //Tapahtumankäsittelijäetodi joka lisää henkilölistaan uuden ihmisen
   const addNewPerson = (event) => {
@@ -29,20 +36,68 @@ const App = () => {
      name: newName,
      number: newNum
     }
-   
-    setPersons(persons.concat(newObj))
-    setNewName('')
-    setNewNum('')
 
+    serverComm.postNewData(newObj).then(newPerson => {
+      setPersons(persons.concat(newPerson))
+      setAnnouncement(`Added ${newObj.name}`)
+
+      setTimeout(() => {setAnnouncement(null)}, 3000)
+    })
+   
     }else{
 
-      alert(`${newName} is already added to phonebook`)
+      if(window.confirm(`${newName} is already added to phonebook. Do you want to replace the old number with a new one?`)){
+        
+        const oldObj = persons.find(person => person.name === newName)
+        const newObj = {...oldObj, number:newNum}
+        serverComm.updateData(oldObj.id, newObj).then(updatedPerson => {
+          
+          setPersons(persons.map(person =>  person.id !== oldObj.id ? person:updatedPerson))
+        
+          setAnnouncement(`Changed number of ${updatedPerson.name}`)
+          setTimeout(() => {setAnnouncement(null)}, 3000)
+        
+        }).catch(error => {
+          
+          setError(true)
+          setAnnouncement(`Person was already deleted from the phonebook.`)
+          setTimeout(() => {setAnnouncement(null)}, 3000)
+          setTimeout(() => {setError(false)}, 3000)
+
+
+          setPersons(persons.filter(person => person.id !== newObj.id))
+          
+        })
+
+      }else{
+
+        console.log("Add cancelled")
+
+      }
 
     }
       
   }
+ 
+  //Henkilöiden poisto
+  const deletePerson = (id) => {
 
-/*Metodi joka hoitaa newname-tilan päivityksen kenttään
+    const targetPerson = persons.find(person => person.id === id)
+
+    if(window.confirm(`Do you really want to delete ${targetPerson.name} `)){
+
+    serverComm.deleteData(id).then(response => console.log('Deletion successful'))
+    setPersons(persons.filter(human => human.id !== id))
+
+    setAnnouncement(`Deleted ${targetPerson.name}`)
+    setTimeout(() => {setAnnouncement(null)}, 3000)
+
+    }else{console.log("Deletion cancelled")}
+
+  }
+
+
+  /*Metodi joka hoitaa newname-tilan päivityksen kenttään
   kirjoitettaessa.
 */
   const handleNameWrite = (event) => {
@@ -64,6 +119,8 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
 
+      <Notification message = {announcement} isError = {isError} />
+
       <Filterform 
       filterLetters = {filterLetters} 
       changeHandler = {handleFilter}
@@ -80,13 +137,17 @@ const App = () => {
 
   
       <h2>Numbers</h2>
-      <Listofpeople list = {persons.filter(person => person.name.slice(0, filterLetters.length) === filterLetters)} />
+      <Listofpeople list = {persons.filter(person => person.name.slice(0, filterLetters.length) === filterLetters)} deleteFunction = {deletePerson} />
        
       
     </div>
   )
 
+  
+
 }
+
+
 
 
 
