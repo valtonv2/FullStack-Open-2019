@@ -31,7 +31,7 @@ const App = () => {
     
     event.preventDefault()
 
-    if(!persons.map(person => person.name).includes(newName)){
+    if(newName && newNum && !persons.map(person => person.name).includes(newName)){
     const newObj ={
      name: newName,
      number: newNum
@@ -39,19 +39,27 @@ const App = () => {
 
     serverComm.postNewData(newObj).then(newPerson => {
       setPersons(persons.concat(newPerson))
+      console.log('Person added is ', newPerson.name )
       setAnnouncement(`Added ${newObj.name}`)
 
       setTimeout(() => {setAnnouncement(null)}, 3000)
+    }).catch(error => {
+      console.log("Error recieved.", error.response.data.error)
+      setError(true)
+      setAnnouncement(error.response.data.error)
+      setTimeout(() => {setAnnouncement(null)}, 3000)
+      setTimeout(() => {setError(false)}, 3000)
+
     })
    
     }else{
 
-      if(window.confirm(`${newName} is already added to phonebook. Do you want to replace the old number with a new one?`)){
+      if(newName && newNum && window.confirm(`${newName} is already added to phonebook. Do you want to replace the old number with a new one?`)){
         
         const oldObj = persons.find(person => person.name === newName)
         const newObj = {...oldObj, number:newNum}
         serverComm.updateData(oldObj.id, newObj).then(updatedPerson => {
-          
+          console.log(`Updated: ${updatedPerson.name} ${updatedPerson.number}`)
           setPersons(persons.map(person =>  person.id !== oldObj.id ? person:updatedPerson))
         
           setAnnouncement(`Changed number of ${updatedPerson.name}`)
@@ -114,7 +122,21 @@ const App = () => {
     console.log(filterLetters)
 
   }
+  
+  //Metodi joka vastaa ihmisten filtteröinnistä
+  const filteredPeople = () => {
 
+    const list = []
+
+    persons.forEach(person => {
+      if(person && person.name.slice(0, filterLetters.length) === filterLetters){
+      list.push(person)
+      }
+  })
+  return list
+  }
+ 
+ 
   return (
     <div>
       <h2>Phonebook</h2>
@@ -137,7 +159,7 @@ const App = () => {
 
   
       <h2>Numbers</h2>
-      <Listofpeople list = {persons.filter(person => person.name.slice(0, filterLetters.length) === filterLetters)} deleteFunction = {deletePerson} />
+      <Listofpeople list = {filteredPeople()} deleteFunction = {deletePerson} />
        
       
     </div>
