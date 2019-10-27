@@ -2,7 +2,7 @@ POST  http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-"title": "The adventures of No. 8462",
+"title": "No jee",
 "author": "Valtteri Valtonen",
 "url": "Not yet",
 "likes": 9001
